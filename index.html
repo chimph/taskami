@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>emberno - the right task at the right time.</title>
+<meta name="description" content="a task manager for iPhone that plans your day for you. weather-aware, area-aware, local-first.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Sora:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070D1F;
+    --body: #8FA3C8;
+    --bright: #C6D2E8;
+    --dim: #3B4A66;
+    --green: #5AF78E;
+    --teal: #20B4C4;
+    --amber-mark: #E8B23D;
+    --amber-chip: #F3A261;
+    --pink: #FF6AC1;
+    --card-bg: rgba(255,255,255,.05);
+    --card-border: rgba(255,255,255,.1);
+    --hair: rgba(255,255,255,.07);
+    --sora: 'Sora', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--bright);
+    font-family: var(--sora);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .col { width: 100%; max-width: 1180px; }
+  a { text-decoration: none; }
+  section, .panel { scroll-margin-top: 20px; }
+
+  /* ---- nav ---- */
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; }
+  .nav .brand { display: flex; align-items: center; gap: 10px; }
+  .nav .brand img { width: 28px; height: 28px; display: block; }
+  .nav .brand span { font-family: var(--mono); font-weight: 700; font-size: 15px; color: #fff; }
+  .nav .links { display: flex; align-items: center; gap: 26px; font-size: 13px; }
+  .nav .links a { color: var(--body); }
+  .nav .links a:hover { color: #fff; }
+  .nav .links a.pill {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    color: #fff; border-radius: 999px; padding: 8px 18px; font-size: 12.5px; font-weight: 600;
+  }
+
+  /* ---- gradient panels ---- */
+  .hero {
+    background: linear-gradient(175deg, #1443D6 0%, #1668D8 34%, #189BC9 72%, #20B4C4 100%);
+    margin: 12px 20px 0; border-radius: 24px; padding: 64px 48px 0;
+    display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden;
+  }
+  .hero > img.logo { width: 96px; height: 96px; display: block; margin-bottom: 22px; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+  .hero h1 {
+    margin: 0 0 20px; font-size: 50px; line-height: 1.1; font-weight: 800; color: #fff;
+    letter-spacing: -1.5px; white-space: nowrap; min-height: 56px;
+  }
+  .hero .sub { margin: 0 0 28px; font-size: 16px; line-height: 1.7; color: rgba(255,255,255,.88); max-width: 600px; text-wrap: pretty; }
+  .hero .meta { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 44px; }
+
+  .waitlist { display: flex; gap: 10px; margin-bottom: 14px; }
+  .waitlist input {
+    width: 260px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.3);
+    border-radius: 999px; padding: 14px 20px; font-size: 13.5px; color: #fff;
+    font-family: var(--mono); outline: none;
+  }
+  .waitlist input::placeholder { color: rgba(255,255,255,.55); }
+  .waitlist button {
+    background: var(--green); color: #06251A; border: none; border-radius: 999px;
+    padding: 14px 24px; font-size: 13.5px; font-weight: 700; font-family: var(--sora); cursor: pointer;
+  }
+  .joined {
+    display: none; align-items: center; gap: 10px; margin-bottom: 14px;
+    background: rgba(0,0,0,.28); border: 1px solid var(--green); border-radius: 999px;
+    padding: 14px 26px; font-family: var(--mono); font-size: 13.5px; color: var(--green);
+  }
+
+  .trio { display: flex; align-items: flex-end; gap: 28px; margin-bottom: -8px; }
+  .trio img { display: block; }
+  .trio .side { width: 240px; border-radius: 24px 24px 0 0; box-shadow: 0 -12px 48px rgba(0,0,0,.4); transform: translateY(28px); }
+  .trio .center { width: 280px; border-radius: 28px 28px 0 0; box-shadow: 0 -16px 56px rgba(0,0,0,.5); }
+
+  /* ---- sections ---- */
+  .sec { padding: 48px 48px 40px; }
+  .sec.first { padding-top: 88px; }
+  .eyebrow { font-family: var(--mono); font-size: 13px; color: var(--teal); margin-bottom: 14px; }
+  .title { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 36px; max-width: 620px; text-wrap: pretty; }
+
+  /* ---- features ---- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px; position: relative; }
+  .card .chip { font-family: var(--mono); font-size: 11.5px; margin-bottom: 14px; }
+  .card h3 { margin: 0 0 10px; font-size: 17px; font-weight: 700; color: #fff; }
+  .card p { margin: 0; font-size: 13.5px; line-height: 1.75; color: var(--body); text-wrap: pretty; }
+  .card p.gap { margin-bottom: 16px; }
+  .card img.sprite { width: 72px; height: 72px; object-fit: contain; display: block; float: right; margin: 8px -6px -4px 14px; transform: scaleX(-1); }
+  .card img.banner { width: 100%; border-radius: 10px; display: block; }
+  .chip.green { color: var(--green); } .chip.teal { color: var(--teal); }
+  .chip.pink { color: var(--pink); } .chip.amber { color: var(--amber-chip); }
+
+  /* ---- screens ---- */
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; row-gap: 36px; }
+  .shot { display: flex; flex-direction: column; gap: 12px; }
+  .shot img { width: 100%; border-radius: 18px; border: 1px solid rgba(255,255,255,.12); display: block; }
+  .shot .label { font-family: var(--mono); font-size: 12.5px; color: #fff; font-weight: 700; }
+  .shot .cap { font-size: 12.5px; line-height: 1.6; color: var(--body); }
+
+  /* ---- compare ---- */
+  .tablebox {
+    background: rgba(255,255,255,.04); border: 1px solid var(--card-border);
+    border-radius: 16px; padding: 8px 20px 20px; overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  th { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,.12); color: var(--body); font-weight: 600; }
+  th:first-child { text-align: left; padding: 14px 12px; font-weight: 400; }
+  th.ft { color: #fff; font-family: var(--mono); font-size: 13px; font-weight: 700; background: rgba(90,247,142,.08); }
+  td { padding: 12px 10px; text-align: center; border-bottom: 1px solid var(--hair); color: var(--bright); }
+  td:first-child { padding: 12px; text-align: left; }
+  td.ft { color: var(--green); background: rgba(90,247,142,.08); font-weight: 700; }
+  td.no { color: var(--dim); }
+  td.part { color: var(--amber-mark); }
+  .legend { font-family: var(--mono); font-size: 11.5px; color: var(--dim); margin-top: 14px; }
+  .legend .g { color: var(--green); } .legend .a { color: var(--amber-mark); }
+
+  /* ---- beta cta ---- */
+  .cta {
+    margin: 48px 20px; background: linear-gradient(175deg, #1443D6 0%, #189BC9 80%);
+    border-radius: 24px; padding: 64px 48px; display: flex; flex-direction: column;
+    align-items: center; gap: 16px; text-align: center;
+  }
+  .cta img { width: 56px; height: 56px; display: block; filter: drop-shadow(0 8px 20px rgba(0,0,0,.35)); }
+  .cta .mono-line { font-family: var(--mono); font-size: 12.5px; color: rgba(255,255,255,.85); }
+  .cta .big { font-size: 36px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta .blurb { font-size: 14px; color: rgba(255,255,255,.85); max-width: 440px; line-height: 1.7; }
+  .cta .waitlist { margin: 8px 0 0; }
+  .cta .waitlist input { width: 280px; }
+  .cta .joined { margin: 8px 0 0; }
+
+  /* ---- faq ---- */
+  .faq { padding: 40px 48px 64px; max-width: 820px; }
+  .faq .title { margin-bottom: 32px; }
+  .qa { padding: 20px 0; border-top: 1px solid rgba(255,255,255,.1); }
+  .qa:last-child { border-bottom: 1px solid rgba(255,255,255,.1); }
+  .qa .q { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .qa .a { font-size: 13.5px; line-height: 1.7; color: var(--body); }
+
+  /* ---- footer ---- */
+  footer {
+    padding: 24px 48px 32px; display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--dim); border-top: 1px solid var(--hair);
+  }
+  footer .brandline { display: flex; align-items: center; gap: 8px; }
+  footer .brandline img { width: 18px; height: 18px; display: block; opacity: .7; }
+  footer .monoline { font-family: var(--mono); }
+  footer a { color: var(--dim); }
+
+  /* ---- responsive ---- */
+  @media (max-width: 980px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .shots { grid-template-columns: repeat(3, 1fr); }
+    .hero h1 { font-size: 38px; }
+  }
+  @media (max-width: 760px) {
+    .nav { padding: 16px 24px; }
+    .nav .links a:not(.pill) { display: none; }
+    .sec, .faq { padding-left: 24px; padding-right: 24px; }
+    .hero { padding: 48px 24px 0; margin: 12px 12px 0; }
+    .hero h1 { font-size: 28px; white-space: normal; letter-spacing: -1px; min-height: 0; }
+    .cards { grid-template-columns: 1fr; }
+    .shots { grid-template-columns: repeat(2, 1fr); }
+    .trio .side { display: none; }
+    .waitlist { flex-direction: column; width: 100%; max-width: 340px; }
+    .waitlist input, .cta .waitlist input { width: 100%; }
+    .waitlist button { width: 100%; }
+    .cta { margin: 48px 12px; padding: 48px 24px; }
+    .cta .big { font-size: 28px; }
+    footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="col">
+
+  <!-- nav -->
+  <div class="nav">
+    <div class="brand">
+      <img src="assets/logo.png" alt="emberno logo">
+      <span>~/emberno &gt;</span>
+    </div>
+    <div class="links">
+      <a href="#features">features</a>
+      <a href="#screens">screens</a>
+      <a href="#compare">compare</a>
+      <a href="#faq">faq</a>
+      <a href="#beta" class="pill">join the waitlist</a>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div class="hero panel">
+    <img class="logo" src="assets/logo.png" alt="emberno logo">
+    <h1 id="typed" aria-label="the right task at the right time."></h1>
+    <p class="sub">a task manager for iPhone that plans your day for you. it knows the weather, knows where you are, and knows what's due, so when you open it, the answer to "what should i do right now?" is already on screen.</p>
+    <form class="waitlist" data-waitlist>
+      <input type="email" required placeholder="you@example.com" aria-label="email address">
+      <button type="submit">→ join the waitlist</button>
+    </form>
+    <div class="joined" data-joined>✓ you're on the list. testflight invite to follow.</div>
+    <div class="meta">iPhone (iOS 26) · local-first · no account · no tracking</div>
+    <div class="trio">
+      <img class="side" src="assets/schedule.png" alt="schedule tab - days ahead with per-day forecasts">
+      <img class="center" src="assets/today.png" alt="today tab - recommended tasks with reason chips">
+      <img class="side" src="assets/chat.png" alt="ember chat - i've been thinking about your backlog">
+    </div>
+  </div>
+
+  <!-- features -->
+  <section class="sec first" id="features">
+    <div class="eyebrow"># features</div>
+    <div class="title">a planner, not another list.</div>
+    <div class="cards">
+      <div class="card">
+        <div class="chip green">‹dry now›</div>
+        <h3>weather-aware planning</h3>
+        <p>live WeatherKit data. outdoor tasks surface when it's dry and wait when it rains, with per-task wind and temperature limits. the ‹dry now› chip tells you why a task is up.</p>
+      </div>
+      <div class="card">
+        <div class="chip teal">&gt; plan</div>
+        <h3>a real planning engine</h3>
+        <p>two passes. hard filters cut the impossible: wrong area, not yet eligible, weather unmet, blocked. then a scoring pass ranks the rest by urgency, weather fit and importance, and packs the days ahead.</p>
+      </div>
+      <div class="card">
+        <div class="chip pink">home · cabin · office</div>
+        <h3>areas &amp; locations</h3>
+        <p>tasks belong to areas. each area gets its own weather, its own backlog and its own plan. arrive, and the right list is already waiting.</p>
+      </div>
+      <div class="card">
+        <div class="chip teal">#chat</div>
+        <h3>ember</h3>
+        <p>ember is your friendly fire sprite assistant, powered by on-device AI, and your main way in. throw tasks at ember in plain words, like "fix the gate @home", and they're filed, shopping items too. then ask why something isn't on today, or say "take thursday off".<img class="sprite" src="assets/ember.png" alt="ember, the emberno assistant"> code owns truth; ember owns the conversation.</p>
+      </div>
+      <div class="card">
+        <div class="chip green">// no account. no server.</div>
+        <h3>local-first + iCloud</h3>
+        <p>no tracking either. tasks live on your phone, sync through your own iCloud, and everything works offline. there's nothing to sign up for and nowhere for your data to leak.</p>
+      </div>
+      <div class="card">
+        <div class="chip amber">‹ready today›</div>
+        <h3>your plan, at a glance</h3>
+        <p class="gap">the home screen widget keeps your next tasks and time bank visible. lock screen variants too.</p>
+        <img class="banner" src="assets/widget-banner.png" alt="emberno home screen widget">
+      </div>
+    </div>
+  </section>
+
+  <!-- screens -->
+  <section class="sec" id="screens">
+    <div class="eyebrow"># screens</div>
+    <div class="title">the whole system, at a glance.</div>
+    <div class="shots">
+      <div class="shot">
+        <img src="assets/today.png" alt="today tab">
+        <div class="label">today</div>
+        <div class="cap">what to do right now, and why.</div>
+      </div>
+      <div class="shot">
+        <img src="assets/schedule.png" alt="schedule tab">
+        <div class="label">schedule</div>
+        <div class="cap">smart scheduling. constantly adjusting.</div>
+      </div>
+      <div class="shot">
+        <img src="assets/backlog.png" alt="backlog tab">
+        <div class="label">backlog</div>
+        <div class="cap">your classic task list. sorted by area.</div>
+      </div>
+      <div class="shot">
+        <img src="assets/planning.png" alt="planner showing areas, locations, and their task and shopping counts">
+        <div class="label">planner</div>
+        <div class="cap">every area and location, with task and shopping counts at a glance.</div>
+      </div>
+      <div class="shot">
+        <img src="assets/diary.png" alt="diary tab">
+        <div class="label">diary</div>
+        <div class="cap">proof you actually did things.</div>
+      </div>
+      <div class="shot">
+        <img src="assets/chat.png" alt="ember chat">
+        <div class="label">#chat</div>
+        <div class="cap">ember is your main interface. ever present. ready for tasking.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- compare -->
+  <section class="sec" id="compare">
+    <div class="eyebrow"># compare</div>
+    <div class="title">lists remember. emberno plans.</div>
+    <div class="tablebox">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="ft">emberno</th>
+            <th>Things 3</th>
+            <th>Todoist</th>
+            <th>TickTick</th>
+            <th>MS To Do</th>
+            <th>Reminders</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>weather-aware planning</td><td class="ft">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>plans your day automatically</td><td class="ft">✓</td><td class="no">—</td><td class="part">~</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>area / location-scoped plans</td><td class="ft">✓</td><td class="no">—</td><td class="part">~</td><td class="part">~</td><td class="no">—</td><td class="part">~</td></tr>
+          <tr><td>on-device AI assistant</td><td class="ft">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>task + shopping dependencies</td><td class="ft">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>no account required</td><td class="ft">✓</td><td>✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td>✓</td></tr>
+          <tr><td>no subscription</td><td class="ft">✓</td><td>✓</td><td class="no">—</td><td class="no">—</td><td>✓</td><td>✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend"><span class="g">✓</span> built in · <span class="a">~</span> partial or paid add-on · — not available</div>
+  </section>
+
+  <!-- faq -->
+  <section class="faq" id="faq">
+    <div class="eyebrow"># faq</div>
+    <div class="title">Questions</div>
+    <div>
+      <div class="qa">
+        <div class="q">When can I try it?</div>
+        <div class="a">Join the waitlist below. Invites go out through TestFlight as spots open, with an App Store release to follow.</div>
+      </div>
+      <div class="qa">
+        <div class="q">What platforms does it run on?</div>
+        <div class="a">iPhone, including home screen and lock screen widgets. Dark mode only, by design.</div>
+      </div>
+      <div class="qa">
+        <div class="q">How does weather planning work?</div>
+        <div class="a">Tasks can require dry conditions, with optional wind and temperature limits, alongside an indoor/outdoor tag. The planner checks the forecast for each of your areas and packs outdoor work into the windows that fit, re-planning as the forecast shifts.</div>
+      </div>
+      <div class="qa">
+        <div class="q">Where does my data live?</div>
+        <div class="a">On your device, synced through your personal iCloud. No accounts, no third-party servers, and Ember, the assistant, runs on-device too.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- beta cta -->
+  <div class="cta panel" id="beta">
+    <img src="assets/logo.png" alt="emberno logo">
+    <div class="mono-line">~/emberno &gt; join --waitlist</div>
+    <div class="big">be first in line.</div>
+    <div class="blurb">join the waitlist. TestFlight invites go out as spots open.</div>
+    <form class="waitlist" data-waitlist>
+      <input type="email" required placeholder="you@example.com" aria-label="email address">
+      <button type="submit">→ join the waitlist</button>
+    </form>
+    <div class="joined" data-joined>✓ you're on the list. testflight invite to follow.</div>
+  </div>
+
+  <!-- footer -->
+  <footer>
+    <span class="brandline"><img src="assets/logo.png" alt="">emberno - the right task at the right time.</span>
+    <span class="monoline">local-first · iCloud sync · no account · no tracking</span>
+    <a href="mailto:hello@firetasks.dev">email support</a>
+  </footer>
+
+</div>
+
+<script>
+  // typewriter - 55ms/char, no cursor; reduced motion renders instantly
+  (function () {
+    var full = "the right task at the right time.";
+    var el = document.getElementById("typed");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.textContent = full;
+      return;
+    }
+    var i = 0;
+    var t = setInterval(function () {
+      i++;
+      el.textContent = full.slice(0, i);
+      if (i >= full.length) clearInterval(t);
+    }, 55);
+  })();
+
+  // waitlist forms - swap to confirmation pill.
+  // NOTE: no signup endpoint wired yet (was TBD in the brief); this is UI-only.
+  document.querySelectorAll("[data-waitlist]").forEach(function (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      form.style.display = "none";
+      var pill = form.parentElement.querySelector("[data-joined]");
+      if (pill) pill.style.display = "flex";
+    });
+  });
+</script>
+</body>
+</html>
