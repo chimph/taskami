@@ -161,6 +161,10 @@
   footer .brandline img { width: 18px; height: 18px; display: block; opacity: .7; }
   footer .monoline { font-family: var(--mono); }
   footer a { color: var(--dim); }
+  footer .social { display: flex; align-items: center; gap: 14px; }
+  footer .social a { color: var(--dim); display: block; transition: color .15s; }
+  footer .social a:hover { color: #fff; }
+  footer .social svg { width: 16px; height: 16px; display: block; }
 
   /* ---- responsive ---- */
   @media (max-width: 980px) {
@@ -373,8 +377,14 @@
   <footer>
     <span class="brandline"><img src="assets/logo.png" alt="">taskami - the right task at the right time.</span>
     <span class="monoline">local-first · iCloud sync · no account · no tracking</span>
-    <a href="mailto:support@taskami.app">email support</a>
-    <a href="https://x.com/taskamiapp">@taskamiapp</a>
+    <span class="social">
+      <a href="mailto:support@taskami.app" aria-label="email support" title="support@taskami.app">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m21.5 7.5-9.5 6-9.5-6"/></svg>
+      </a>
+      <a href="https://x.com/taskamiapp" aria-label="taskami on x" title="@taskamiapp">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644z"/></svg>
+      </a>
+    </span>
   </footer>
 
 </div>
